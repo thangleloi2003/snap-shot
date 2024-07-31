@@ -27,7 +27,7 @@ import image23 from '../img/img23.jpg';
 import image24 from '../img/img24.jpg';
 
 // Array of images
-const images = [image1, image2, image3, image4, image5, image6, image7, image8, image9, image10, 
+const img = [image1, image2, image3, image4, image5, image6, image7, image8, image9, image10, 
 image11, image12, image13, image14, image15, image16, image17, image18, image19, 
 image20, image21, image22, image23, image24];
 
@@ -37,7 +37,7 @@ const Image: React.FC = () => {
     <div className="w-[1200px] m-auto photo">
       <h2 className="text-center text-3xl font-semibold mt-[52px] mx-0 mb-[40px]">Mountain Pictures</h2>
       <div className="flex flex-wrap justify-center gap-5">
-        {images.map((image, index) => (
+        {img.map((image, index) => (
           <div key={index} className="w-[255px] h-[180px] overflow-hidden photo-main">
             <img src={image} alt={`Image ${index + 1}`} className="w-full h-full object-cover" />
           </div>
