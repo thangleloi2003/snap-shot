@@ -4,6 +4,7 @@ import { Form } from 'react-router-dom';
 
 const SearchBar: React.FC = () => {
     return (
+        <div className="container">
         <Form className="search-form flex justify-center">
             <Input type="text" placeholder="Search..." className="rounded-none p-0 auto w-[385px]" />
             <Button type="submit" className="outline-none border-none cursor-pointer bg-[#051c33] pt-0 pb-0 px-[5px]" disabled>
@@ -11,6 +12,7 @@ const SearchBar: React.FC = () => {
                 </svg>
             </Button>
         </Form>
+        </div>
     );
 };
 
