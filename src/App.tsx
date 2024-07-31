@@ -1,3 +1,15 @@
+import Header from './components/Header';
+import SearchBar from './components/SearchBar';
+import CategoryButtons from './components/CategoryButtons';
+import ImageGrid from './components/Image';
+
 export default function App() {
-  return <div>Hello world.</div>
+  return (
+    <div>
+      <Header />
+      <SearchBar />
+      <CategoryButtons />
+      <ImageGrid />
+    </div>
+  );
 }

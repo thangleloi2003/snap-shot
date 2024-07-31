@@ -9,7 +9,13 @@ export default {
     "./src/**/*.{html,js,ts,jsx,tsx}",
   ],
   theme: {
-    extend: {},
+    extend: {
+      fontFamily: {
+        sans: ['Josefin Sans', 'Helvetica', 'Arial', 'sans-serif'],
+        lobster: ['Lobster', 'sans-serif'],
+        times: ['Times New Roman', 'Times', 'serif']
+      },
+    },
     screens: {
       "2xl": { max: "1535px" },
       // => @media (max-width: 1535px) { ... }
