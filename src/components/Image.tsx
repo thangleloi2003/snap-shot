@@ -34,7 +34,7 @@ image20, image21, image22, image23, image24];
 const Image: React.FC = () => {
   return (
     
-    <div className="w-[1200px] m-auto photo">
+    <div className="w-[1200px] mx-auto px-5 photo">
       <h2 className="text-center text-3xl font-semibold mt-[52px] mx-0 mb-[40px]">Mountain Pictures</h2>
       <div className="flex flex-wrap justify-center gap-5">
         {img.map((image, index) => (

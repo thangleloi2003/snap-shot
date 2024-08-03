@@ -5,9 +5,9 @@ const categories = ['Mountain', 'Beaches', 'Birds', 'Food'];
 
 const CategoryButtons: React.FC = () => {
   return (
-    <div className="flex justify-center m-[40px] gap-5 sm:gap-2 p-2">
+    <div className="flex justify-center m-[40px] space-x-3 sm:space-x-2 ">
       {categories.map(category => (
-        <Button key={category} className=" w-[100px] h-[28px] p-[5px] bg-[#051C33] text-white rounded text-[16px]">
+        <Button key={category} className=" w-[100px] h-[28px] px-4 bg-[#051C33] text-white rounded text-[16px]">
           {category}
         </Button>
       ))}
