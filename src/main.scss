@@ -125,7 +125,7 @@ h1 {
     overflow-x: hidden;
   }
   .photo{
-    width: 745px;
+    width: 740px;
     margin: 0 auto;
     display: flex;
     flex-wrap: wrap;
@@ -134,10 +134,11 @@ h1 {
 
   .photo-main {
     width: 220px;
+    transform: translateX(-2px);
   }
 }
 
-@media (min-width: 1024px) and (max-width: 1429px) {
+@media (min-width: 1024px) and (max-width: 1439px) {
   body {
     overflow-x: hidden;
   }
@@ -152,6 +153,6 @@ h1 {
 
   .photo-main {
     width: 225px;
-    transform: translateX(-5px);
+    transform: translateX(-4px);
   }
 }
