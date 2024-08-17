@@ -98,7 +98,9 @@ const CategoryButtons: React.FC = () => {
         </h2>
 
         {loading ? (
-          <div> <Spinner size="lg" color="primary" /> </div>
+          <div className="flex justify-center items-center h-80">
+          <Spinner size="lg" color="primary" />
+        </div>
         ) : (
           <div className="flex flex-wrap justify-center gap-10 photo">
             {filteredTokens && filteredTokens.length > 0 ? (filteredTokens.map((url, index) => (
