@@ -39,13 +39,15 @@ const CategoryButtons: React.FC = () => {
         const timeoutId = setTimeout(() => {
           setLoading(false);
         }, 5000);
+
         const response = await axios.get<Token[]>(tokenLists[selectedCategory]);
-        clearTimeout(timeoutId); // Xóa timeout khi có dữ liệu
-        const checkedTokens = response.data.map((token, index) => {
-          if (selectedCategory === 'Arbitrum' && [112, 115, 137].includes(index + 1)) {
-            return {
-              ...token, logoURI: defaultToken,
-            };
+        clearTimeout(timeoutId);
+        const checkedTokens = response.data.map((token) => {
+
+          if (token.logoURI === null) {
+            console.log('LogoURI', token.logoURI);
+            return { ...token, logoURI: defaultToken, }
+
           }
           return token;
         });
@@ -75,8 +77,8 @@ const CategoryButtons: React.FC = () => {
   return (
     <div>
       <div className="search-form flex justify-center">
-        <Input type="text" placeholder="Search..." className="rounded-none p-0 auto w-[369px]" 
-        value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
+        <Input type="text" placeholder="Search..." className="rounded-none p-0 auto w-[369px]"
+          value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
         />
         <Button className="min-w-fit w-16 h-10 rounded-md cursor-pointer bg-[#051c33]" disabled>
           <svg height="32" width="32"><path d="M19.427 21.427a8.5 8.5 0 1 1 2-2l5.585 5.585c.55.55.546 1.43 0 1.976l-.024.024a1.399 1.399 0 0 1-1.976 0l-5.585-5.585zM14.5 21a6.5 6.5 0 1 0 0-13 6.5 6.5 0 0 0 0 13z" fill="#ffffff" fill-rule="evenodd"></path>
@@ -86,7 +88,7 @@ const CategoryButtons: React.FC = () => {
 
       <div className="flex justify-center m-[40px] space-x-4 sm:space-x-2">
         {categories.map((category) => (
-          <Button key={category} className="w-[96px] h-[28px] px-4 bg-[#051C33] text-white rounded text-[16px]"onClick={() => handleCategoryChange(category)}>
+          <Button key={category} className="w-[96px] h-[28px] px-4 bg-[#051C33] text-white rounded text-[16px]" onClick={() => handleCategoryChange(category)}>
             {category}
           </Button>
         ))}
@@ -99,16 +101,16 @@ const CategoryButtons: React.FC = () => {
 
         {loading ? (
           <div className="flex justify-center items-center h-80">
-          <Spinner size="lg" color="primary" />
-        </div>
+            <Spinner size="lg" color="primary" />
+          </div>
         ) : (
           <div className="flex flex-wrap justify-center gap-10 photo">
             {filteredTokens && filteredTokens.length > 0 ? (filteredTokens.map((url, index) => (
-                <div key={index} className="w-28 h-28 relative photo-main overflow-hidden cursor-pointer transition-transform duration-700 ease-in-out hover:scale-110 hover:shadow-lg rounded-[50%]">
-                  <img src={url.logoURI} alt={`Token ${index + 1}`} className="w-full h-full object-cover" onError={handleTokenError}
-                  />
-                </div>
-              ))
+              <div key={index} className="w-28 h-28 relative photo-main overflow-hidden cursor-pointer transition-transform duration-700 ease-in-out hover:scale-110 hover:shadow-lg rounded-[50%]">
+                <img src={url.logoURI} alt={`Token ${index + 1}`} className="w-full h-full object-cover" onError={handleTokenError}
+                />
+              </div>
+            ))
             ) : (
               <p>No tokens available for this category.</p>
             )}
