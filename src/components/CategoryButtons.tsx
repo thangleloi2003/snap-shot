@@ -92,19 +92,17 @@ const CategoryButtons: React.FC = () => {
         ))}
       </div>
 
-      <div className="w-[1200px] mx-auto px-5 pb-8 token-gallery">
+      <div className="w-[1200px] mx-auto px-5 pb-8">
         <h2 className="text-center text-[32px] text-[#051c33] font-semibold mt-[52px] mx-0 mb-8">
           {selectedCategory} Token Library
         </h2>
 
         {loading ? (
-          <div className="flex justify-center items-center h-80">
-          <Spinner size="lg" color="primary" />
-        </div>
+          <div> <Spinner size="lg" color="primary" /> </div>
         ) : (
-          <div className="flex flex-wrap justify-center gap-5 photo">
+          <div className="flex flex-wrap justify-center gap-10 photo">
             {filteredTokens && filteredTokens.length > 0 ? (filteredTokens.map((url, index) => (
-                <div key={index} className="w-28 h-28 relative photo-main overflow-hidden cursor-pointer transition-transform duration-700 ease-in-out hover:scale-110 hover:shadow-lg border-none photo-main">
+                <div key={index} className="w-28 h-28 relative photo-main overflow-hidden cursor-pointer transition-transform duration-700 ease-in-out hover:scale-110 hover:shadow-lg rounded-[50%]">
                   <img src={url.logoURI} alt={`Token ${index + 1}`} className="w-full h-full object-cover" onError={handleTokenError}
                   />
                 </div>
