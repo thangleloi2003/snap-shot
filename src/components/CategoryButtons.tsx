@@ -116,26 +116,18 @@ const CategoryButtons: React.FC = () => {
             ))}
           </div>
         ) : (
-<div className="flex flex-wrap justify-center gap-10">
-  {filteredTokens.length > 0 ? (
-    filteredTokens.map((token, index) => (
-      <div
-        key={index}
-        className="w-24 h-24 relative overflow-hidden cursor-pointer transition-transform duration-700 ease-in-out hover:scale-110 hover:shadow-lg rounded-[50%] bg-[#f0f0f0] border border-[#cccccc]"
-      >
-        <img
-          src={token.logoURI || defaultToken}
-          alt={`Token ${index + 1}`}
-          className="w-full h-full object-cover"
-          onError={handleTokenError}
-        />
-      </div>
-    ))
-  ) : (
-    <p>No tokens available for this category.</p>
-  )}
-</div>
-
+          <div className="flex flex-wrap justify-center gap-10">
+            {filteredTokens && filteredTokens.length > 0 ? (filteredTokens.map((url, index) => (
+              <div key={index} className="w-24 h-24 relative overflow-hidden cursor-pointer transition-transform duration-700 ease-in-out hover:scale-110 hover:shadow-lg rounded-[50%]
+                bg-[#f0f0f0] border border-[#cccccc]">
+                <img src={url.logoURI} alt={`Token ${index + 1}`} className="w-full h-full object-cover" onError={handleTokenError}
+                />
+              </div>
+            ))
+            ) : (
+              <p>No tokens available for this category.</p>
+            )}
+          </div>
         )}
       </div>
     </div>
