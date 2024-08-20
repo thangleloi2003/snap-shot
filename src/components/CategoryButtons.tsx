@@ -28,7 +28,6 @@ const CategoryButtons: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState<string>('');
   
-
   useEffect(() => {
     const fetchCategories = async () => {
       try {
