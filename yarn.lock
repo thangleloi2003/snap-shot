@@ -3831,6 +3831,11 @@ dom-helpers@^5.0.1:
     "@babel/runtime" "^7.8.7"
     csstype "^3.0.2"
 
+dom@^0.0.3:
+  version "0.0.3"
+  resolved "https://registry.yarnpkg.com/dom/-/dom-0.0.3.tgz#16e0c225a0553d8e4362cc4bcd78d8fde59af67b"
+  integrity sha512-Uzda1zIAXO8JG2fm6IbJcdzBrRaC5Q308HTIjCXCQHh7ZVACJOeQzYYvd99plJ2/HUpZQk9IxNI/Y+QrO6poIQ==
+
 domain-browser@^4.22.0:
   version "4.23.0"
   resolved "https://registry.npmjs.org/domain-browser/-/domain-browser-4.23.0.tgz"
@@ -5754,7 +5759,7 @@ react-router-dom@^6.26.1:
     "@remix-run/router" "1.19.1"
     react-router "6.26.1"
 
-react-router@6.26.1:
+react-router@6.26.1, react-router@^6.26.1:
   version "6.26.1"
   resolved "https://registry.yarnpkg.com/react-router/-/react-router-6.26.1.tgz#88c64837e05ffab6899a49df2a1484a22471e4ce"
   integrity sha512-kIwJveZNwp7teQRI5QmwWo39A5bXRyqpH0COKKmPnyD2vBvDwgFXSqDUYtt1h+FEyfnE8eXr7oe0MxRzVwCcvQ==
