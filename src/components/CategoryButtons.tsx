@@ -31,20 +31,22 @@ const CategoryButtons: React.FC = () => {
 
   useEffect(() => {
     const fetchCategories = async () => {
-      try {
-        const response = await axios.get('https://api.github.com/repos/viaprotocol/tokenlists/contents/tokenlists');
-        const categoryFiles = response.data.map((file: any) => file.name.replace('.json', ''));
-        setServerCategories(categoryFiles);
-        if (!category || !categoryFiles.includes(category)) {
-          setSelectedCategory(categoryFiles[0] || '');
-          navigate(`/${categoryFiles[0] || ''}/${searchInput}`);
+      if (serverCategories.length === 0) {
+        try {
+          const response = await axios.get('https://api.github.com/repos/viaprotocol/tokenlists/contents/tokenlists');
+          const categoryFiles = response.data.map((file: any) => file.name.replace('.json', ''));
+          setServerCategories(categoryFiles);
+          if (!category || !categoryFiles.includes(category)) {
+            setSelectedCategory(categoryFiles[0] || '');
+            navigate(`/${categoryFiles[0] || ''}/${searchInput}`);
+          }
+        } catch (err) {
+          console.error('Failed to fetch categories', err);
         }
-      } catch (err) {
-        console.error('Failed to fetch categories', err);
       }
     };
     fetchCategories();
-  }, [category, navigate, searchInput]);
+  }, [category, navigate, searchInput, serverCategories]);
 
   useEffect(() => {
     const fetchTokens = async () => {
