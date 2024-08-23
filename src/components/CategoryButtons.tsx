@@ -52,7 +52,7 @@ const CategoryButtons: React.FC = () => {
     const fetchTokens = async () => {
       try {
         setLoading(true);
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        await new Promise(resolve => setTimeout(resolve, 50));
 
         const response = await axios.get<Token[]>(`${tokenListsBaseURL}${selectedCategory}.json`);
         const checkedTokens = response.data.map((token) => {
