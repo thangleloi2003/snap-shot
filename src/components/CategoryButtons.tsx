@@ -28,6 +28,10 @@ const CategoryButtons: React.FC = () => {
   const [tokens, setTokens] = useState<Token[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [searchInput, setSearchInput] = useState<string>(searchQuery);
+  const [page, setPage] = useState<number>(1); // New state for pagination
+  const [hasMoreTokens, setHasMoreTokens] = useState<boolean>(true);
+
+  const tokensPerPage = 100; // Number of tokens to load per batch
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -52,16 +56,21 @@ const CategoryButtons: React.FC = () => {
     const fetchTokens = async () => {
       try {
         setLoading(true);
-        await new Promise(resolve => setTimeout(resolve, 50));
+        await new Promise(resolve => setTimeout(resolve, 10));
 
         const response = await axios.get<Token[]>(`${tokenListsBaseURL}${selectedCategory}.json`);
         const checkedTokens = response.data.map((token) => {
           if (token.logoURI === null) {
-            return { ...token, logoURI: defaultToken, };
+            return { ...token, logoURI: defaultToken };
           }
           return token;
         });
-        setTokens(checkedTokens);
+
+        const start = (page - 1) * tokensPerPage;
+        const end = page * tokensPerPage;
+
+        setTokens((prevTokens) => [...prevTokens, ...checkedTokens.slice(start, end)]); // Load tokens in batches
+        setHasMoreTokens(checkedTokens.length > end); // Check if there are more tokens to load
         setLoading(false);
       } catch (err) {
         setLoading(false);
@@ -71,7 +80,7 @@ const CategoryButtons: React.FC = () => {
     if (selectedCategory) {
       fetchTokens();
     }
-  }, [selectedCategory]);
+  }, [selectedCategory, page]);
 
   useEffect(() => {
     if (selectedCategory) {
@@ -81,6 +90,8 @@ const CategoryButtons: React.FC = () => {
 
   const handleCategoryChange = (category: string) => {
     setSelectedCategory(category);
+    setTokens([]); // Clear tokens when changing category
+    setPage(1); // Reset page
     navigate(`/${category}/${searchInput}`);
   };
 
@@ -98,11 +109,16 @@ const CategoryButtons: React.FC = () => {
     event.currentTarget.src = defaultToken;
   };
 
+  const loadMoreTokens = () => {
+    if (hasMoreTokens) {
+      setPage((prevPage) => prevPage + 1);
+    }
+  };
+
   return (
     <div>
       <div className="flex justify-center">
-        <Input type="text" placeholder="Search..." className="rounded-none w-[369px] custom-input" value={searchInput} onChange={handleSearchChange}
-        />
+        <Input type="text" placeholder="Search..." className="rounded-none w-[369px] custom-input" value={searchInput} onChange={handleSearchChange} />
         <Button className="min-w-fit w-16 h-10 rounded-md cursor-pointer bg-[#051c33]" disabled>
           <svg height="32" width="32">
             <path
@@ -128,26 +144,34 @@ const CategoryButtons: React.FC = () => {
           {selectedCategory} token library
         </h2>
 
-        {loading ? (
+        {loading && page === 1 ? (
           <div className="flex flex-wrap justify-center gap-10">
-            {Array.from({ length: 100 }).map((_, index) => (
+            {Array.from({ length: tokensPerPage }).map((_, index) => (
               <Skeleton key={index} className="w-24 h-24 rounded-[50%]" />
             ))}
           </div>
         ) : (
           <div className="flex flex-wrap justify-center gap-10">
-            {filteredTokens.length > 0 ? (filteredTokens.map((token, index) => (
-              <div key={index} className="w-24 h-24 relative overflow-hidden cursor-pointer transition-transform duration-700 ease-in-out hover:scale-110 hover:shadow-lg rounded-[50%]
-                  bg-[#f0f0f0] border border-[#cccccc]"
-              >
-                <img src={token.logoURI} alt={`Token ${index + 1}`} className="w-full h-full object-cover"
-                  onError={handleTokenError}
-                />
-              </div>
-            ))
+            {filteredTokens.length > 0 ? (
+              filteredTokens.map((token, index) => (
+                <div key={index} className="w-24 h-24 relative overflow-hidden cursor-pointer transition-transform duration-700 ease-in-out hover:scale-110 hover:shadow-lg rounded-[50%]
+                    bg-[#f0f0f0] border border-[#cccccc]"
+                >
+                  <img src={token.logoURI} alt={`Token ${index + 1}`} className="w-full h-full object-cover"
+                    onError={handleTokenError}
+                  />
+                </div>
+              ))
             ) : (
               <p>No tokens available for this category.</p>
             )}
+          </div>
+        )}
+        {hasMoreTokens && (
+          <div className="flex justify-center mt-10">
+            <Button className="bg-[#051c33] text-white" onClick={loadMoreTokens}>
+              Load More
+            </Button>
           </div>
         )}
       </div>
