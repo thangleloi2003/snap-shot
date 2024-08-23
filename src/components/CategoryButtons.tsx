@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Button, Input, Skeleton } from '@nextui-org/react';
 import axios from 'axios';
 import { useParams, useNavigate } from 'react-router-dom';
+import debounce from 'lodash.debounce';
 
 const tokenListsBaseURL = 'https://raw.githubusercontent.com/viaprotocol/tokenlists/main/tokenlists/';
 const defaultToken = 'https://e7.pngegg.com/pngimages/710/778/png-clipart-question-mark-question-mark.png';
@@ -28,10 +29,6 @@ const CategoryButtons: React.FC = () => {
   const [tokens, setTokens] = useState<Token[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [searchInput, setSearchInput] = useState<string>(searchQuery);
-  const [page, setPage] = useState<number>(1); // New state for pagination
-  const [hasMoreTokens, setHasMoreTokens] = useState<boolean>(true);
-
-  const tokensPerPage = 100; // Number of tokens to load per batch
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -52,11 +49,11 @@ const CategoryButtons: React.FC = () => {
     fetchCategories();
   }, [category, navigate, searchInput, serverCategories]);
 
-  useEffect(() => {
-    const fetchTokens = async () => {
+  const fetchTokens = useCallback(async () => {
+    if (selectedCategory) {
       try {
         setLoading(true);
-        await new Promise(resolve => setTimeout(resolve, 10));
+        await new Promise(resolve => setTimeout(resolve, 5)); // Reduce wait time to 50ms
 
         const response = await axios.get<Token[]>(`${tokenListsBaseURL}${selectedCategory}.json`);
         const checkedTokens = response.data.map((token) => {
@@ -65,22 +62,17 @@ const CategoryButtons: React.FC = () => {
           }
           return token;
         });
-
-        const start = (page - 1) * tokensPerPage;
-        const end = page * tokensPerPage;
-
-        setTokens((prevTokens) => [...prevTokens, ...checkedTokens.slice(start, end)]); // Load tokens in batches
-        setHasMoreTokens(checkedTokens.length > end); // Check if there are more tokens to load
+        setTokens(checkedTokens);
         setLoading(false);
       } catch (err) {
         setLoading(false);
       }
-    };
-
-    if (selectedCategory) {
-      fetchTokens();
     }
-  }, [selectedCategory, page]);
+  }, [selectedCategory]);
+
+  useEffect(() => {
+    fetchTokens();
+  }, [fetchTokens]);
 
   useEffect(() => {
     if (selectedCategory) {
@@ -90,15 +82,13 @@ const CategoryButtons: React.FC = () => {
 
   const handleCategoryChange = (category: string) => {
     setSelectedCategory(category);
-    setTokens([]); // Clear tokens when changing category
-    setPage(1); // Reset page
     navigate(`/${category}/${searchInput}`);
   };
 
-  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleSearchChange = debounce((event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchInput(event.target.value);
     navigate(`/${selectedCategory}/${event.target.value}`);
-  };
+  }, 300);
 
   const filteredTokens = tokens.filter((token) =>
     token.name.toLowerCase().includes(searchInput.toLowerCase()) ||
@@ -107,12 +97,6 @@ const CategoryButtons: React.FC = () => {
 
   const handleTokenError = (event: React.SyntheticEvent<HTMLImageElement, Event>) => {
     event.currentTarget.src = defaultToken;
-  };
-
-  const loadMoreTokens = () => {
-    if (hasMoreTokens) {
-      setPage((prevPage) => prevPage + 1);
-    }
   };
 
   return (
@@ -132,8 +116,11 @@ const CategoryButtons: React.FC = () => {
 
       <div className="flex flex-wrap justify-center m-[40px] gap-5 sm:gap-3">
         {serverCategories.map((category) => (
-          <Button key={category} className="w-[125px] h-[28px] px-4 bg-[#051C33] text-white rounded text-[16px]"
-            onClick={() => handleCategoryChange(category)}>
+          <Button
+            key={category}
+            className={`w-[125px] h-[28px] px-4 text-white rounded text-[16px] ${selectedCategory === category ? 'bg-neutral-600' : 'bg-[#051C33]'}`}
+            onClick={() => handleCategoryChange(category)}
+          >
             {category}
           </Button>
         ))}
@@ -144,34 +131,26 @@ const CategoryButtons: React.FC = () => {
           {selectedCategory} token library
         </h2>
 
-        {loading && page === 1 ? (
+        {loading ? (
           <div className="flex flex-wrap justify-center gap-10">
-            {Array.from({ length: tokensPerPage }).map((_, index) => (
+            {Array.from({ length: 100 }).map((_, index) => (
               <Skeleton key={index} className="w-24 h-24 rounded-[50%]" />
             ))}
           </div>
         ) : (
           <div className="flex flex-wrap justify-center gap-10">
-            {filteredTokens.length > 0 ? (
-              filteredTokens.map((token, index) => (
-                <div key={index} className="w-24 h-24 relative overflow-hidden cursor-pointer transition-transform duration-700 ease-in-out hover:scale-110 hover:shadow-lg rounded-[50%]
-                    bg-[#f0f0f0] border border-[#cccccc]"
-                >
-                  <img src={token.logoURI} alt={`Token ${index + 1}`} className="w-full h-full object-cover"
-                    onError={handleTokenError}
-                  />
-                </div>
-              ))
+            {filteredTokens.length > 0 ? (filteredTokens.map((token, index) => (
+              <div key={index} className="w-24 h-24 relative overflow-hidden cursor-pointer transition-transform duration-700 ease-in-out hover:scale-110 hover:shadow-lg rounded-[50%]
+                  bg-[#f0f0f0] border border-[#cccccc]"
+              >
+                <img src={token.logoURI} alt={`Token ${index + 1}`} className="w-full h-full object-cover"
+                  onError={handleTokenError}
+                />
+              </div>
+            ))
             ) : (
               <p>No tokens available for this category.</p>
             )}
-          </div>
-        )}
-        {hasMoreTokens && (
-          <div className="flex justify-center mt-10">
-            <Button className="bg-[#051c33] text-white" onClick={loadMoreTokens}>
-              Load More
-            </Button>
           </div>
         )}
       </div>
