@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Button, Input, Skeleton } from '@nextui-org/react';
 import axios from 'axios';
 import { useParams, useNavigate } from 'react-router-dom';
-import debounce from 'lodash.debounce';
+import debounce from 'lodash/debounce';
 
 const tokenListsBaseURL = 'https://raw.githubusercontent.com/viaprotocol/tokenlists/main/tokenlists/';
 const defaultToken = 'https://e7.pngegg.com/pngimages/710/778/png-clipart-question-mark-question-mark.png';
@@ -29,6 +29,7 @@ const CategoryButtons: React.FC = () => {
   const [tokens, setTokens] = useState<Token[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [searchInput, setSearchInput] = useState<string>(searchQuery);
+  const [cache, setCache] = useState<{ [key: string]: Token[] }>({});
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -49,30 +50,44 @@ const CategoryButtons: React.FC = () => {
     fetchCategories();
   }, [category, navigate, searchInput, serverCategories]);
 
-  const fetchTokens = useCallback(async () => {
-    if (selectedCategory) {
-      try {
-        setLoading(true);
-        await new Promise(resolve => setTimeout(resolve, 5)); // Reduce wait time to 50ms
+  const fetchTokens = async (category: string) => {
+    if (cache[category]) {
+      setTokens(cache[category]);
+      return;
+    }
 
-        const response = await axios.get<Token[]>(`${tokenListsBaseURL}${selectedCategory}.json`);
-        const checkedTokens = response.data.map((token) => {
-          if (token.logoURI === null) {
-            return { ...token, logoURI: defaultToken };
-          }
-          return token;
-        });
-        setTokens(checkedTokens);
-        setLoading(false);
-      } catch (err) {
-        setLoading(false);
-      }
+    try {
+      setLoading(true);
+      const response = await axios.get<Token[]>(`${tokenListsBaseURL}${category}.json`);
+      const checkedTokens = response.data.map((token) => {
+        if (token.logoURI === null) {
+          return { ...token, logoURI: defaultToken };
+        }
+        return token;
+      });
+
+      setCache((prevCache) => ({ ...prevCache, [category]: checkedTokens }));
+      setTokens(checkedTokens);
+      setLoading(false);
+    } catch (err) {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (selectedCategory) {
+      fetchTokens(selectedCategory);
     }
   }, [selectedCategory]);
 
   useEffect(() => {
-    fetchTokens();
-  }, [fetchTokens]);
+    if (category !== selectedCategory) {
+      setSelectedCategory(category);
+    }
+    if (searchQuery !== searchInput) {
+      setSearchInput(searchQuery);
+    }
+  }, [category, searchQuery, selectedCategory, searchInput]);
 
   useEffect(() => {
     if (selectedCategory) {
@@ -85,10 +100,14 @@ const CategoryButtons: React.FC = () => {
     navigate(`/${category}/${searchInput}`);
   };
 
-  const handleSearchChange = debounce((event: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchInput(event.target.value);
-    navigate(`/${selectedCategory}/${event.target.value}`);
-  }, 300);
+  const debouncedSearchChange = useCallback(debounce((value: string) => {
+    setSearchInput(value);
+    navigate(`/${selectedCategory}/${value}`);
+  }, 0), [selectedCategory]);
+
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    debouncedSearchChange(event.target.value);
+  };
 
   const filteredTokens = tokens.filter((token) =>
     token.name.toLowerCase().includes(searchInput.toLowerCase()) ||
@@ -116,11 +135,8 @@ const CategoryButtons: React.FC = () => {
 
       <div className="flex flex-wrap justify-center m-[40px] gap-5 sm:gap-3">
         {serverCategories.map((category) => (
-          <Button
-            key={category}
-            className={`w-[125px] h-[28px] px-4 text-white rounded text-[16px] ${selectedCategory === category ? 'bg-neutral-600' : 'bg-[#051C33]'}`}
-            onClick={() => handleCategoryChange(category)}
-          >
+          <Button key={category} className="w-[125px] h-[28px] px-4 bg-[#051C33] text-white rounded text-[16px]"
+            onClick={() => handleCategoryChange(category)}>
             {category}
           </Button>
         ))}
@@ -139,15 +155,13 @@ const CategoryButtons: React.FC = () => {
           </div>
         ) : (
           <div className="flex flex-wrap justify-center gap-10">
-            {filteredTokens.length > 0 ? (filteredTokens.map((token, index) => (
-              <div key={index} className="w-24 h-24 relative overflow-hidden cursor-pointer transition-transform duration-700 ease-in-out hover:scale-110 hover:shadow-lg rounded-[50%]
-                  bg-[#f0f0f0] border border-[#cccccc]"
-              >
-                <img src={token.logoURI} alt={`Token ${index + 1}`} className="w-full h-full object-cover"
-                  onError={handleTokenError}
-                />
-              </div>
-            ))
+            {filteredTokens.length > 0 ? (
+              filteredTokens.map((token, index) => (
+                <div key={index} className="w-24 h-24 relative overflow-hidden cursor-pointer transition-transform duration-700 ease-in-out hover:scale-110 hover:shadow-lg rounded-[50%]
+                  bg-[#f0f0f0] border border-[#cccccc]">
+                  <img src={token.logoURI} alt={`Token ${index + 1}`} className="w-full h-full object-cover" onError={handleTokenError} />
+                </div>
+              ))
             ) : (
               <p>No tokens available for this category.</p>
             )}
