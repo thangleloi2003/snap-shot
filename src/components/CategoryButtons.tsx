@@ -3,6 +3,7 @@ import { Button, Input, Skeleton } from '@nextui-org/react';
 import axios from 'axios';
 import { useParams, useNavigate } from 'react-router-dom';
 import debounce from 'lodash/debounce';
+import { VariableSizeList as List } from 'react-window';
 
 const tokenListsBaseURL = 'https://raw.githubusercontent.com/viaprotocol/tokenlists/main/tokenlists/';
 const defaultToken = 'https://e7.pngegg.com/pngimages/710/778/png-clipart-question-mark-question-mark.png';
@@ -118,6 +119,25 @@ const CategoryButtons: React.FC = () => {
     event.currentTarget.src = defaultToken;
   };
 
+  // Function to return the height of each row
+  const getItemSize = (_index: number) => 111; // Adjust the height as needed
+
+  // Row component for rendering each row
+  const Row = ({ index, style }: { index: number; style: React.CSSProperties }) => {
+    const tokenIndex = index * 10;
+
+    return (
+      <div style={style} className="flex flex-wrap gap-[18px] xl:gap-[22px]">
+        {filteredTokens.slice(tokenIndex, tokenIndex + 10).map((token, tokenIndex) => (
+          <div key={tokenIndex} className="w-24 h-24 relative overflow-hidden cursor-pointer transition-transform duration-700 
+          ease-in-out hover:scale-110 hover:shadow-lg rounded-[50%] bg-[#f0f0f0] border border-[#cccccc]">
+            <img src={token.logoURI} alt={`Token ${tokenIndex + 1}`} className="w-full h-full object-cover" onError={handleTokenError} />
+          </div>
+        ))}
+      </div>
+    );
+  };
+
   return (
     <div>
       <div className="flex justify-center">
@@ -149,23 +169,21 @@ const CategoryButtons: React.FC = () => {
 
         {loading ? (
           <div className="flex flex-wrap justify-center gap-10">
-            {Array.from({ length: 100 }).map((_, index) => (
+            {Array.from({ length: 10 }).map((_, index) => (
               <Skeleton key={index} className="w-24 h-24 rounded-[50%]" />
             ))}
           </div>
+        ) : filteredTokens.length === 0 ? (
+          <p className="text-center">No tokens available for this category.</p>
         ) : (
-          <div className="flex flex-wrap justify-center gap-10">
-            {filteredTokens.length > 0 ? (
-              filteredTokens.map((token, index) => (
-                <div key={index} className="w-24 h-24 relative overflow-hidden cursor-pointer transition-transform duration-700 ease-in-out hover:scale-110 hover:shadow-lg rounded-[50%]
-                  bg-[#f0f0f0] border border-[#cccccc]">
-                  <img src={token.logoURI} alt={`Token ${index + 1}`} className="w-full h-full object-cover" onError={handleTokenError} />
-                </div>
-              ))
-            ) : (
-              <p>No tokens available for this category.</p>
-            )}
-          </div>
+            <List
+              height={1000}
+              itemCount={Math.ceil(filteredTokens.length / 10)}
+              itemSize={getItemSize}
+              width="100%"
+            >
+              {Row}
+            </List>
         )}
       </div>
     </div>
